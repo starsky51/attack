@@ -13,13 +13,13 @@ def main():
 
     # main loop
     run = True
-    game = Game(2, Game.DifficultyLevel.MEDIUM)
+    game = Game(1, Game.DifficultyLevel.EASY)
 
     while (run):
         Global.clock.tick(Global.FPS)
 
         game.update()
-        game.draw(Global.screen)
+        game.draw()
 
         # event loop
         for event in pygame.event.get():

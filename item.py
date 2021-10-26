@@ -31,6 +31,8 @@ class Item(pygame.sprite.Sprite):
         self.y: int = y
         self.lifespan : int = lifespan
 
+        self.biscuit_img = pygame.image.load('images/cookie.png').convert_alpha()
+
         # handle item type
         if type == Item.Type.BISCUIT:
             self.width: int = 15
@@ -41,7 +43,7 @@ class Item(pygame.sprite.Sprite):
             self.state: Item.State = Item.State.IDLE
             self.timer: int = 0
             self.image: pygame.Surface = pygame.transform.scale(
-                Global.biscuit_img, (self.width, self.height))
+                self.biscuit_img, (self.width, self.height))
         self.rect: pygame.Rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
@@ -76,27 +78,27 @@ class Item(pygame.sprite.Sprite):
         return False
 
     def collect(self, player: Player) -> None:
-        Global.item_snd.play()
+        player.game.item_snd.play()
         self.state = Item.State.COLLECT
         self.collector = player
         return None
 
-    def draw(self, surface: pygame.Surface) -> None:
+    def draw(self, surface: pygame.Surface, camera_pos: pygame.Vector2) -> None:
         if self.state == Item.State.EXPIRED:
             item_value = Global.item_font.render(
                 str(self.value), True, Global.Colour.RED)
-            surface.blit(item_value, (self.x + (self.width // 2),
-                         self.y - (self.timer // 2)))
+            surface.blit(item_value, (self.x + (self.width // 2) - camera_pos[0],
+                         self.y - (self.timer // 2) - camera_pos[1]))
         elif self.state == Item.State.COLLECTED:
             item_value = Global.item_font.render(
                 str(self.value), True, Global.Colour.BLUE)
-            surface.blit(item_value, (self.x + (self.width // 2),
-                         self.y - (self.timer // 2)))
+            surface.blit(item_value, (self.x + (self.width // 2) - camera_pos[0],
+                         self.y - (self.timer // 2) - camera_pos[1]))
         elif self.state != Item.State.DESTROY:
             if self.state == Item.State.EXPIRING:
                 if (self.timer // 10) % 2 == 0:
-                    surface.blit(self.image, self.rect)
+                    surface.blit(self.image, (self.rect.x - camera_pos[0], self.rect.y - camera_pos[1]))
             else:
-                surface.blit(self.image, self.rect)
+                surface.blit(self.image, (self.rect.x - camera_pos[0], self.rect.y - camera_pos[1]))
 
         return None

@@ -1,13 +1,13 @@
 # import libraries
+import math
 import pygame
+from enum import Enum, auto
 
 # import locals
 from globals import Global
-from enum import Enum, auto
+from tile import Tile
 
 # obstacle class
-
-
 class Obstacle(pygame.sprite.Sprite):
 
     # type constants
@@ -16,34 +16,34 @@ class Obstacle(pygame.sprite.Sprite):
         TABLE = auto()
 
     # variables    
-    x: int = None
-    y: int = None
-    type: Type = None
-    bounciness: int = None # 0 to 10
-    width: int = None
-    height: int = None
-    rect: pygame.Rect = None
+    x: int
+    y: int
+    bounciness: int # 0 to 10
+    width: int
+    height: int
+    rect: pygame.Rect
+    tile: Tile
+    image: pygame.Surface
 
-    def __init__(self, type: Type, x: int, y: int, width: int, height: int) -> None:
+    def __init__(self, tile: Tile, x: int, y: int, width: int = Global.TILE_WIDTH
+               , height: int = Global.TILE_HEIGHT, bounciness: int = 0) -> None:
         pygame.sprite.Sprite.__init__(self)
         self.x = x
         self.y = y
-        self.type = type
+        self.tile = tile
+        self.bounciness = bounciness
         self.width = width
         self.height = height
         self.rect = pygame.Rect(x, y, width, height)
 
-        # handle obstacle types
-        if type == Obstacle.Type.WALL:
-            # TODO: improve wall obstacle to look modular rather than a single stretched image
-            self.image = pygame.transform.scale(
-                Global.wall_img, (width, height))
-            self.bounciness = 7
-        elif type == Obstacle.Type.TABLE:
-            self.image = pygame.transform.scale(
-                Global.table_img, (width, height))
-            self.bounciness = 2
-        else:
-            raise ValueError('Obstacle type not recognised: ' + type)
+        # create image from tiles
+        self.image = pygame.Surface((width, height), pygame.SRCALPHA, 32)
+        for i in range(0, width, self.tile.width):
+            for j in range(0, height, self.tile.height):
+                self.image.blit(self.tile.get_image(), (i, j))
 
+        return None
+
+    def draw(self, surface: pygame.Surface, camera_pos : pygame.Vector2) -> None:
+        surface.blit(self.image, (self.rect.x - camera_pos[0], self.rect.y - camera_pos[1]))
         return None
